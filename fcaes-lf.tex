@@ -1,0 +1,71 @@
+\input zrcadlo % charger la macro pour la composition parall`ele
+% param`etres d’empagement :
+\hsize=108mm % largeur du rectangle d’empagement \vsize=466pt % hauteur du rectangle d’empagement (39 lignes) \hoffset=-1in \advance\hoffset by20mm % marge de gauche
+\voffset=-1in \advance\voffset by20mm % marge de
+\ifx\pdfoutput\undefined \else % pour pdfTeX
+   \pdfpagewidth=148mm % largeur de la page
+   \pdfpageheight=210mm % hauteur de la page
+\fi
+te^te
+\clubpenalty=10000 % empe^cher des orphelins \widowpenalty=10000 % empe^cher des veuves
+\raggedbottom % l’espace blanc sera accumulé en bas des pages \topskip=1\topskip \parskip=1\parskip % supprimer l’élasticité
+% macro pour charger des polices avec un espacement d’un tiers de cadratin :
+\def\myfont#1 at{\def\temp{#1}\afterassignment\domyfont \dimen0=}
+\def\domyfont{\expandafter\dodomyfont\temp\relax}
+\def\dodomyfont#1#2\relax{\font#1#2 at\dimen0 \fontdimen6#1=\dimen0
+   \fontdimen2#1=.333333\dimen0 \fontdimen3#1=.166667\dimen0
+   \fontdimen4#1=.111111\dimen0 \fontdimen7#1=.111111\dimen0 }
+% charger des polices de la famille Nimbus Roman de URW :
+\myfont\tenrm=utmr8p at 10pt % romain
+\myfont\tenit=utmri8p at 10pt % italique
+\myfont\tenbf=utmb8p at 10pt % gras
+\rm % police par défaut
+\parindent=1.5em % renfoncement d’alinéa
+\frenchspacing % espacement a` la franc ̧aise
+\lccode‘\’=‘\’ % considérer l’apostrophe comme une lettre
+\pbaccents % les commandes d’accentuation produiront des caract`eres `a 8 bits
+% correspondants afin de permettre la césure de mots accentués
+% (macro définie dans gcsplain) \tolerance=500
+% macro pour ajouter un espace avant la ponctuation double :
+{\catcode‘\:=13 \catcode‘\;=13 \catcode‘\?=13 \catcode‘\!=13
+\gdef\frenchpunct{\catcode‘\:=13 \catcode‘\;=13 \catcode‘\?=13 \catcode‘\!=13
+   \def:{\ifhmode\unskip\nobreak\ \fi\char‘\: }%
+   \def;{\ifhmode\unskip\thinspace\fi\char‘\; }%
+   \def?{\ifhmode\unskip\thinspace\fi\char‘\? }%
+   \def!{\ifhmode\unskip\thinspace\fi\char‘\! }}}
+% dans le texte fran ̧cais, les guillemets sont saisis au moyen du
+% caract`ere " ; il faut donc définir ce dernier de mani`ere qu’il produise % les guillemets ouvrants et fermats en alternance (les commandes \flqq et % \frqq, définies dans gcsplain, produisent respectivement les guillemets % fran ̧cais ouvrants et fermants, sans espacement) :
+{\catcode‘\"=13
+\gdef\openquotes{\flqq~\global\let"=\closequotes} \gdef\closequotes{~\frqq\global\let"=\openquotes} \global\let"=\openquotes}
+
+% chapitres :
+\def\cap#1{\ifvmode \nobreak\hbox{\Vers{\the\chapitre}}
+      \nobreak\vskip-\baselineskip\allowbreak
+   \else \skip0=\lastskip\unskip\Vers{\the\chapitre}\hskip\skip0 \fi
+   \Vers{#1}\global\chapitre={#1}{\bf #1.}\nobreak}
+\newtoks\chapitreL \newtoks\chapitreP % pour conserver le numéro de chapitre \chapitreL={1} \chapitreP={1} % valeurs par défaut
+% sections :
+\def\sec#1{\Vers{\the\chapitre}(#1)\nobreak}
+% définitions spécifiques au texte latin : \def\nastavlevy{\language=\latin \frenchpunct \let\chapitre=\chapitreL} % définitions spécifiques au texte fran ̧cais : \def\nastavpravy{\language=\french \frenchpunct \let\chapitre=\chapitreP
+   \catcode‘\"=13 }
+% en-t^ete : \headline={\it % italique
+   \ifodd\pageno % page de droite
+      \hfil Livre I, chap.
+      \ifx\firstmarkP\botmarkP \firstmarkP % un seul chapitre sur la page
+                                           % courrante
+         \else \firstmarkP-\botmarkP \fi \hfil % plusieurs chapitres sur la
+                                               % page courrante
+\llap{\folio}% numéro de page \else % page de gauche
+\rlap{\folio}% numéro de page
+\hfil Liber I, cap.
+\ifx\firstmarkL\botmarkL \firstmarkL % un seul chapitre sur la page
+                                           % courrante
+         \else \firstmarkL-\botmarkL \fi \hfil % plusieurs chapitres sur la page courante
+\fi}
+% le pied de page sera vide :
+\footline={}
+% la premi`ere page sera vierge, sans en-t^ete (avant de commencer la mise en % pages parall`ele, la commande \zrcadli exécute la commande \novalevastrana % qui, par défaut, fait commencer la composition sur une nouvelle page
+% paire) :
+\def\novalevastrana{{\headline={\hfil}\null\vfil\break}}
+% afin de pouvoir réutiliser ce fichier pour une autre t^ache : \csname FinDuChargement\endcsname
+\zrcadli caes-l caes-f % commencer la composition paralle`le \bye % fin

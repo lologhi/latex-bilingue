@@ -1,0 +1,48 @@
+\input zrcadlo % charger la macro pour la composition parall`ele
+% définitions spécifiques au texte de droite : \def\nastavpravy{%
+\obeylines % 1 ligne du fichier source = 1 vers
+\parindent=0pt % supprimer le renfoncement d’alinéa
+\everypar={\hskip0pt minus-.5\hsize % compensation de l’espace donné par
+                                       % \leftskip (voir ci-dessous)
+\vers % un nouveau vers
+\numeroter % numéroter les vers de cinq en cinq
+% le renfoncement de la seconde ligne sera identique pour tous les vers % concernés (3/4 de la longueur d’une ligne) :
+\hangindent=.75\hsize \hangafter=1 }
+% emp^echer une coupure de page avant la seconde ligne d’un vers divisé : \clubpenalty=10000
+% composition en drapeau sans césure de mots (pour les vers divisés) : \rightskip=0pt plus 1fil
+% si la partie d’un vers reportée sur la seconde ligne était
+% exceptionellement large, elle aura la possibilité de s’étendre vers le % gauche gr^ace `a une valeur spéciale de \leftskip (cet espace doit
+% ^etre compensé au début du vers, voir ci-dessus) :
+\leftskip=0pt minus.5\hsize
+\let\margin=\rmargin} % numérotation des vers sera `a droite
+% définitions spécifiques au texte de gauche
+\def\nastavlevy{\nastavpravy % les m^emes définitions que pour le texte de droite
+\let\margin=\lmargin % numérotation des vers sera `a gauche \catcode‘\’=13 } % guillemets ouvrants et fermants sont saisis dans
+                    % le fichier source latin comme apostrophe
+% numérotation des vers : \def\numeroter{\count255=\versnum
+   \divide\count255 by5 \multiply\count255 by5
+\ifnum\count255=\versnum \margin{\the\versnum}\fi} \def\lmargin#1{\llap{\margfont#1\rm\quad}} % note marginale a` gauche {\obeylines % note marginale `a droite: \gdef\rmargin#1#2^^M{#2\unskip\nobreak\hfill\rlap{\rm\quad\margfont #1}\par}} \font\margfont=csr7
+% pour le texte latin, o`u les guillemets sont saisis au moyen de l’apostrophe, % définir cette dernie`re de manie`re qu’elle produise des guillemets
+% ouvrants et fermants en alternance :
+{\catcode‘\’=13
+\gdef\openquote{\char‘\‘\global\let’=\closequote}
+\gdef\closequote{\char‘\’\global\let’=\openquote}
+\global\let’=\openquote}
+% points de suspension :
+\def\dots{.\thinspace.\thinspace.}
+% param`etres d’empagement :
+\hsize=101.5mm % largeur du rectangle d’empagement \vsize=467pt % hauteur du rectangle d’empagement (36 lignes) \hoffset=-1in \advance\hoffset by23.25mm
+\voffset=-1in \advance\voffset by20mm \ifx\pdfoutput\undefined \else % pour pdfTeX
+   \pdfpagewidth= 148mm % largeur de la page
+   \pdfpageheight=210mm % hauteur de la page
+\fi
+\raggedbottom % l’espace blanc sera accumulé au bas des pages \baselineskip=13pt % un interlignage un peu augmenté fait bon effet dans la
+% poésie
+\topskip=12pt % afin que l’en-t^ete soit separé du rectangle d’empagement par
+              % une ligne blanche
+% l’en-t^ete alternera selon que la page courrante sera une page de gauche ou % de droite :
+\headline={\it \if L\strana \folio\qquad Liber primus\hfil
+   \else \hfil Erster Gesang\qquad\folio\fi}
+% la premi`ere page sera vierge, sans en-t^ete : \def\novalevastrana{{\headline={\hfil}\null\vfil\break}}
+\nopagenumbers % afin que le numéro de page n’apparaisse pas en pied de page \zrcadli verg-l verg-n % commencer la composition paralle`le
+\bye % fin

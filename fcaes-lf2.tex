@@ -1,0 +1,104 @@
+% charger les définitions de la t^ache précédente ; le chargement sera % terminé juste avant le commencement de la composition : \let\FinDuChargement=\endinput
+\input fcaes-lf
+% on insérera en fin de paragraphes une pénalité négative % pouvoir facilement décomposer la page en paragraphes : \def\par{\ifhmode\endgraf\penalty-2 \fi}
+afin de
+% afin que les paragraphes correspondants de gauche et de droite commencent % certainement sur la m^eme double page, une marque de synchronisation sera % mise en début de chaque paragraphe `a l’aide de la commande \everypar (il % n’est pas, en effet, exclu que le début d’un paragraphe ne coı ̈ncide ni
+% avec le début d’un chapitre ni avec le début d’une section) : \def\seteverypar{\everypar={\Vers{\the\chapitre}}} \expandafter\def\expandafter\nastavlevy\expandafter{\nastavlevy \seteverypar} \expandafter\def\expandafter\nastavpravy\expandafter{\nastavpravy \seteverypar}
+% il faut modifier la macro \cap de sorte que la pénalité inserée en fin
+% de paragraphes se déplace apr`es la marque contenant le numéro du
+% chapitre précédent (vu que TeX n’est pas dans le mode vertical ordinaire, % on peut employer \unpenalty) ; il faut encore supprimer la marque insérée % par l’intermédiaire de \everypar :
+\def\cap#1{\ifvmode \count255=\lastpenalty \unpenalty
+      \nobreak\hbox{\Vers{\the\chapitre}} \nobreak\vskip-\baselineskip
+      \penalty\count255 \everypar={\seteverypar}
+   \else \skip0=\lastskip\unskip\Vers{\the\chapitre}\hskip\skip0 \fi
+   \Vers{#1}\global\chapitre={#1}{\bf #1.}\nobreak}
+\newbox\gauche
+\newbox\droite
+\newbox\droiterecomposee
+\def\recomposerpages{%
+% insérer un espace infiniment étirable en début de la page de gauche
+% et de celle de droite, et supprimer en fin une pénalité éventuelle
+% (la bo^ıte \pravastrana contient la page de droite) : 
+\setbox\gauche=\vbox{\vfil\unvbox255\unpenalty}% page de gauche 
+\setbox\droite=\vbox{\vfil\unvcopy\pravastrana\unpenalty}% page de droite 
+\splittopskip=1\baselineskip \splitmaxdepth=\maxdimen
+\setbox0=\box4 \setbox0=\box6 % vider les boı^tes 4 et 6
+\recomposer % commencer décomposition et recomposition des pages 
+\setbox255=\box4 % mettre la page de gauche recomposée dans la bo^ıte 255
+
+\global\setbox\droiterecomposee=\box6 } % stocker la page de droite % recomposée
+\def\recomposer{%
+% insérer en fin une pénalité supérieure `a celles qui se trouvent
+% entre des paragraphes, et en m^eme temps inférieure `a toutes les
+% autres pénalités, et un espace qui entravera le fonctionnement de la
+% pénalité négative automatiquement ajouteé `a la fin de boı^te par
+% l’opération \vsplit : \setbox0=\vbox{\unvbox\gauche\penalty-1\vskip2000pt}% page de gauche \setbox2=\vbox{\unvbox\droite\penalty-1\vskip2000pt}% page de droite
+% séparer la page de gauche en deux parties, le dernier paragraphe restera % dans la bo^ıte 0 :
+\dimen0=\ht0 \advance\dimen0 by-1000pt
+\setbox\gauche=\vsplit0 to\dimen0
+% séparer la page de droite en deux parties, le dernier paragraphe restera % dans la bo^ıte 2 :
+\dimen2=\ht2 \advance\dimen2 by-1000pt
+\setbox\droite=\vsplit2 to\dimen2
+\ifvoid0 % on a rencontré le premier paragraphe de la page de gauche
+\ifvoid2 % on a rencontré le premier paragraphe de la page de droite \setbox0=\vbox{\unvbox\gauche}
+\else % `a droite, il reste encore la fin d’un paragraphe
+% pour ne pas altérer l’ajustement vertical de lignes, il faut
+% supprimer l’espace de \topskip et insérer un espace de
+% \baselineskip :
+\setbox0=\vbox{\break\unvbox\gauche} \setbox255=\vsplit0 to0pt \fi
+      \let\next=\relax
+   \else
+% ajouter un espace de \parskip et supprimer l’espace de 2000pt et la % pénalité de -1 :
+\setbox0=\vbox{\vskip\parskip \unvbox0 \unskip\unpenalty} \let\next=\recomposer
+\fi
+\ifvoid2 % on a rencontré le premier paragraphe de la page de droite
+\ifx\next\recomposer % a` gauche, il reste encore la fin d’un paragraphe % pour ne pas altérer l’ajustement vertical de lignes, il faut
+% supprimer l’espace de \topskip et insérer un espace de
+% \baselineskip :
+         \setbox2=\vbox{\break\unvbox\droite} \setbox255=\vsplit2 to0pt
+      \else
+         \setbox2=\vbox{\unvbox\droite}
+      \fi
+\else
+% ajouter un espace de \parskip et supprimer l’espace de 2000pt et la % pénalité de -1 :
+\setbox2=\vbox{\vskip\parskip\unvbox2 \unskip\unpenalty} \let\next=\recomposer % il se peut qu’`a droite, il reste encore la fin
+                            % d’un paragraphe
+\fi
+% mettre les deux paragraphes séparés chacun dans une \vbox dont la
+% hauteur sera égale `a la hauteur du plus haut de ces deux paragraphes,
+
+% et ajouter ces \vbox respectivement `a la \vbox 4 et 6 :
+\ifdim\ht0>\ht2 % le paragraphe de gauche est plus haut que celui de droite
+% calculer la différence entre les hauteurs :
+\dimen0=\ht0 \advance\dimen0 by-\ht2
+% mettre le paragraphe de droite dans une \vbox d’une hauteur égale `a % celle du paragraphe de gauche :
+\setbox2=\vbox to\ht0{\dimen2=\dp2\unvbox2\kern-\dimen2\vfill}
+% ajouter le paragraphe de gauche `a la \vbox 4 : \setbox4=\vbox{\dp0=0pt\box0\unvbox4}
+% ajouter le paragraphe de droite `a la \vbox 6 ; il sera suivi d’un
+% espace nul capable de se rétrécir d’une distance égale a` celle
+% dont le paragraphe en question a été agrandi : \setbox6=\vbox{\dp2=0pt\box2 \vskip0pt minus\dimen0 \unvbox6}
+   \else % le paragraphe de droite est plus haut ou aussi haut que celui de
+         % gauche
+% calculer la différence entre les hauteurs :
+\dimen0=\ht2 \advance\dimen0 by-\ht0
+% mettre le paragraphe de gauche dans une \vbox d’une hauteur égale `a % celle du paragraphe de droite :
+\setbox0=\vbox to\ht2{\dimen2=\dp0\unvbox0\kern-\dimen2\vfill}
+% ajouter le paragraphe de droite `a la \vbox 6 : \setbox6=\vbox{\dp2=0pt\box2\unvbox6}
+% ajouter le paragraphe de gauche `a la \vbox 4 ; il sera suivi d’un
+% espace nul capable de se rétrécir d’une distance égale a` celle
+% dont le paragraphe en question a été agrandi : \setbox4=\vbox{\dp0=0pt\box0 \vskip0pt minus\dimen0 \unvbox4}
+\fi \next}
+\output={% routine de sortie
+% au moment o`u la premi`ere page blanche sort, la commande \strana n’est
+% pas définie ; ensuite, cette commande prend la valeur de la lettre
+% L quand il s’agit d’une page de gauche, et la valeur de la lettre P quand % il s’agit d’une page de droite
+\ifx\strana\undefined\else
+      \if L\strana
+         \recomposerpages
+      \else
+         \setbox0=\box255 % il faut vider la \box255 ; sinon, TeX se plaindrait
+         \setbox255=\box\droiterecomposee % mettre la page de droite
+% recomposée dans la bo^ıte 255
+   \fi\fi
+   \plainoutput}
+\zrcadli caes-l caes-f % commencer la composition paralle`le \bye % fin

@@ -1,0 +1,49 @@
+\input zrcadlo % charger la macro pour la composition parall`ele
+% param`etres d’empagement :
+\hsize=108mm % largeur du rectangle d’empagement \vsize=466pt % hauteur du rectangle d’empagement (39 lignes) \hoffset=-1in \advance\hoffset by20mm % marge de gauche \voffset=-1in \advance\voffset by15mm % marge de te^te \ifx\pdfoutput\undefined \else % pour pdfTeX
+   \pdfpagewidth=148mm % largeur de la page
+   \pdfpageheight=210mm % hauteur de la page
+\fi
+\clubpenalty=10000 % empe^cher des orphelins \widowpenalty=10000 % empe^cher des veuves
+\raggedbottom % l’espace blanc sera accumulé en bas des pages \topskip=1\topskip \parskip=1\parskip % supprimer l’élasticité
+% macro pour charger des polices avec un espacement d’un tiers de cadratin :
+\def\myfont#1 at{\def\temp{#1}\afterassignment\domyfont \dimen0=}
+\def\domyfont{\expandafter\dodomyfont\temp\relax}
+\def\dodomyfont#1#2\relax{\font#1#2 at\dimen0 \fontdimen6#1=\dimen0
+   \fontdimen2#1=.333333\dimen0 \fontdimen3#1=.166667\dimen0
+\fontdimen4#1=.111111\dimen0 \fontdimen7#1=.111111\dimen0 } \myfont\tenrm=utmr8p at10pt % romain
+\myfont\tenbf=utmb8p at10pt % romain gras
+\myfont\bigbf=utmb8p at28pt % police pour imprimer le numéro de chapitre \myfont\tengrm=opbgr at10pt % grec
+\rm % police par défaut
+\frenchspacing % espacement a` la franc ̧aise
+% définitions spécifiques au texte latin : \def\nastavlevy{\language=\latin}
+% définitions spécifiques au texte grec : \def\nastavpravy{\tengrm \language=\greek
+\grcode} % mettre \lccode `a des valeurs appropriées au grec % (macro définie dans gcsplain)
+% chapitre (le numéro de chapitre occupera deux lignes) : \def\cap#1{\par\setbox0=\hbox{\bigbf #1\rm\enspace}% bo^ıte contenant le % numéro de chapitre
+\hangafter=-2 \hangindent=\wd0 % faire place pour la boı^te
+\noindent\kern-\wd0\smash{\lower\baselineskip\box0}\ignorespaces} % verset (le numéro du premier verset de chaque chapitre ne sera pas % affiché) :
+\def\sec#1{\vers \ifnum#1=1 \ignorespaces \else {\bf #1}\nobreak \fi}
+\def\secx#1{\vers {\bf (#1)}} % verset manquant
+\let\konec=\relax % a` la fin des fichiers sources, il y a une commande \konec % (en tch`eque "konec" = "fin")
+\countdef\doublepageno=1 % registre contenant le numéro de double page \doublepageno=1 % la valeur initiale \def\advancedoublepageno{\global\advance\doublepageno by1 } % augmenter le
+% numéro de double page
+% redéfinir la routine de sortie : \output={%
+\ifodd\doublepageno % double page impaire, le texte latin doit ^etre placé % `a gauche, le texte grec `a droite
+      \normaloutput % envoyer la page courante vers le fichier dvi/pdf
+\if L\strana \else \advancedoublepageno \fi
+\else % double page paire, le texte grec doit e^tre placé `a gauche, le
+% texte latin `a droite
+\if L\strana % on est en train de préparer une page latine
+\global\setbox\pagelatine=\box255 % stocker la page latine \else % on est en train de préparer une page grecque
+         \normaloutput % envoyer la page grecque vers le fichier dvi/pdf
+         \setbox255=\box\pagelatine
+         \normaloutput % envoyer la page latine vers le fichier dvi/pdf
+         \advancedoublepageno
+   \fi\fi}
+\newbox\pagelatine % pour stocker une page latine
+\def\normaloutput{\shipout\pageentiere\advancepageno}
+\def\pageentiere{\vbox{\makeheadline\pagebody\makefootline}}
+% le numéro de double page sera placé en pied de page: \footline={\tenrm \ifodd\pageno \hfil\the\doublepageno
+   \else \the\doublepageno\hfil \fi}
+% la page vierge initiale doit ^etre sortie au moyen de \normaloutput et le % numéro de page doit ^etre supprimé : {\output={\normaloutput}\nopagenumbers\null\vfil\break}
+\zrcadli mc-l mc-g % commencer la composition parall`ele \bye % fin

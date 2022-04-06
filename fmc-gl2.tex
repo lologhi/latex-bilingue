@@ -1,0 +1,60 @@
+\input zrcadlo % charger la macro pour la composition parall`ele
+% param`etres d’empagement :
+\newdimen\Hsize \Hsize=170mm % largeur du rectangle d’empagement (avec deux
+% colonnes)
+\hsize=82mm % largeur d’une colonne
+\vsize=706pt % hauteur du rectangle d’empagement (59 lignes) \hoffset=-1in \advance\hoffset by20mm % marge de gauche \voffset=-1in \advance\voffset by20mm % marge de te^te \ifx\pdfoutput\undefined \else % pour pdfTeX
+   \pdfpagewidth=210mm % largeur de la page
+   \pdfpageheight=297mm % hauteur de la page
+\fi
+\clubpenalty=10000 % empe^cher des orphelins \widowpenalty=10000 % empe^cher des veuves
+\brokenpenalty=0 % page finie par un mot coupé est acceptable \parskip=0pt % pas d’espace avant les paragraphes \baselineskip=12pt plus 1pt % interligne élastique
+% macro pour charger des polices avec un espacement d’un tiers de cadratin :
+\def\myfont#1 at{\def\temp{#1}\afterassignment\domyfont \dimen0=}
+\def\domyfont{\expandafter\dodomyfont\temp\relax}
+\def\dodomyfont#1#2\relax{\font#1#2 at\dimen0 \fontdimen6#1=\dimen0
+   \fontdimen2#1=.333333\dimen0 \fontdimen3#1=.166667\dimen0
+\fontdimen4#1=.111111\dimen0 \fontdimen7#1=.111111\dimen0 } \myfont\tenrm=utmr8p at10pt % romain
+\myfont\tenbf=utmb8p at10pt % gras
+\myfont\smallrm=utmr8p at6pt % police pour le numéro de verset \myfont\bigbf=uhvb8p at12pt % police pour le numéro de chapitre \myfont\tengrm=opbgr at10pt % grec
+\rm % police par défaut
+\frenchspacing % espacement a` la franc ̧aise \parindent=1.5em % renfoncement d’alinéa \tolerance=750
+% définitions spécifiques au texte grec : \def\nastavlevy{\tengrm \language=\greek
+\grcode} % mettre \lccode `a des valeurs approprieés au grec (macro % définie dans gcsplain)
+% définitions spécifiques au texte latin : \def\nastavpravy{\language=\latin}
+% chapitre :
+\def\cap#1{\par\vskip0pt\indent{\bigbf #1\rm\enspace}\ignorespaces}
+% verset (le numéro de verset sera imprimé en exposant avant le verset) : \def\sec#1{\vers \raise.85ex\hbox{\smallrm #1}\ignorespaces} \def\secx#1{\vers\ignorespaces} % verset manquant
+% `a la fin de chaque fichier source, il y a une commande \konec ; on
+% l’emploiera pour signaler la derni`ere page `a la routine de sortie (sur la
+% derni`ere page, on veut, en effet, ajuster les interlignes de la plus courte % des deux colonnes de sorte qu’elle ait la m^eme hauteur que l’autre
+% colonne) :
+\def\konec{\penalty10001\penalty-10001 }
+\newbox\colonnedegauche % pour stocker la colonne de gauche
+% routine de sortie :
+\output={\if L\strana \global\setbox\colonnedegauche=\pagebody
+   \else \setbox255=\pagebody \preparerladernierepage \imprimercolonnes \fi}
+   \def\preparerladernierepage{%
+\ifnum\lastpenaltyL=10001 \ifnum\lastpenaltyP=10001 % derni`ere page
+% mettre les deux colonnes dans des boı^tes verticales ayant leur hauteur % naturelle respective : \setbox\colonnedegauche=\vbox{\unvbox\colonnedegauche} \setbox255=\vbox{\unvbox255}
+      % comparer les hauteurs respectives des colonnes :
+      \ifdim\ht\colonnedegauche<\ht255
+         \setbox\colonnedegauche=\vbox to\ht255{\unvbox\colonnedegauche}
+      \else
+         \setbox255=\vbox to\ht\colonnedegauche{\unvbox255}
+   \fi\fi\fi}
+\def\imprimercolonnes{\shipout\vbox{
+      \makeheadline
+      \vbox to \vsize{\hbox to\Hsize{\leftline{\box\colonnedegauche}\hfil
+         \vrule depth3.5pt width.5pt
+         \hfil\leftline{\box255}}\kern-\prevdepth\vfil}
+      \makefootline}
+   \advancepageno}
+% afin que la ligne de te^te et celle de pied s’étendent sur la largeur des % deux colonnes, il faut redéfinir :
+\def\makeheadline{\vbox to0pt{\vskip-22.5pt
+   \hbox to\Hsize{\vbox to8.5pt{}\the\headline}\vss}\nointerlineskip}
+\def\makefootline{\baselineskip=24pt \lineskiplimit=0pt
+   \hbox to\Hsize{\the\footline}}
+% étant donné la composition en deux colonnes, il n’est pas nécessaire de % commencer sur une page de gauche :
+\let\novalevastrana=\relax
+\zrcadli mc-g mc-l % commencer la composition parall`ele \bye % fin
